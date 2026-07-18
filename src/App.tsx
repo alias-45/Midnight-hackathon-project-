@@ -1,3 +1,4 @@
+import { encrypt, decrypt } from "./lib/encryption";
 import { useEffect, useRef, useState } from "react";
 import {
   type Conversation,
@@ -100,28 +101,34 @@ export default function App() {
     setInput("");
     setSending(true);
 
-    const userMsg = await addMessage({ conversationId: convId, role: "user", encryptedContent: userText });
+    const userMsg = await addMessage({
+    conversationId: convId,
+    role: "user",
+    encryptedContent: await encrypt(userText),
+});
     setMessages((m) => [...m, userMsg]);
 
     // Local-only "learning": look for a fact worth remembering, store it,
     // and let the user see/delete it immediately.
     const candidate = extractCandidateFact(userText);
     if (candidate) {
-      await addProfileFact(candidate);
+      await addProfileFact(await encrypt(candidate));
       setFacts(await listProfileFacts());
     }
 
-    const history = [...messages, userMsg].map((m) => ({
-      role: m.role,
-      content: m.encryptedContent,
-    }));
+    const history = await Promise.all(
+  [...messages, userMsg].map(async (m) => ({
+    role: m.role,
+    content: await decrypt(m.encryptedContent),
+  }))
+);
 
     const replyText = await generateReply(history);
     const assistantMsg = await addMessage({
-      conversationId: convId,
-      role: "assistant",
-      encryptedContent: replyText,
-    });
+    conversationId: convId,
+    role: "assistant",
+    encryptedContent: await encrypt(replyText),
+});
     setMessages((m) => [...m, assistantMsg]);
     setConversations(await listConversations());
     setSending(false);
@@ -172,7 +179,7 @@ export default function App() {
           {facts.length === 0 && <div className="profile-empty">Nothing yet.</div>}
           {facts.map((f) => (
             <div key={f.id} className="fact-item">
-              <span>{f.fact}</span>
+              <span>{f.encryptedFact}</span>
               <button onClick={() => handleDeleteFact(f.id)} title="Forget this fact">
                 ✕
               </button>
@@ -224,7 +231,7 @@ export default function App() {
           {messages.map((m) => (
             <div key={m.id} className={"message " + m.role}>
               <div className="message-role">{m.role === "user" ? "you" : "assistant"}</div>
-              <div className="message-content">{m.content}</div>
+              <div className="message-content">{m.encryptedContent}</div>
             </div>
           ))}
           {sending && (
