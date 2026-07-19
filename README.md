@@ -6,7 +6,7 @@ Your conversations, preferences, and documents remain under your control—encry
 
 ---
 
-🌟 Features
+## Features
 
 - 🧠 Local AI Inference using WebLLM
 - 🔒 Privacy First — No cloud processing
@@ -19,7 +19,7 @@ Your conversations, preferences, and documents remain under your control—encry
 
 ---
 
-🚀 Why VaultAI?
+## Why VaultAI?
 
 Today's AI assistants depend on massive data centers to process every prompt. This introduces privacy concerns, internet dependency, and centralized control over user data.
 
@@ -58,7 +58,7 @@ Instead of sending your conversations to a server, VaultAI transforms your own d
 
 ---
 
-🛠️ Tech Stack
+## Tech Stack
 
 - React
 - TypeScript
@@ -68,7 +68,7 @@ Instead of sending your conversations to a server, VaultAI transforms your own d
 - Tailwind CSS
 
 ---
-🔐 Privacy
+## Privacy
 
 VaultAI is built around one simple principle:
 
@@ -87,7 +87,7 @@ The only network activity is the initial download of the AI model. Once download
 
 ---
 
-🎯 Use Cases
+## Use Cases
 
 - Personal AI Assistant
 - Offline AI Chat
@@ -98,7 +98,7 @@ The only network activity is the initial download of the AI model. Once download
 
 ---
 
-🌍 Vision
+## Vision
 
 We envision a future where users no longer have to trade privacy for intelligence.
 
