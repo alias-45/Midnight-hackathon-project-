@@ -39,6 +39,9 @@ export default function App() {
   const [modelStatus, setModelStatus] = useState("Initializing local model…");
   const [sending, setSending] = useState(false);
   const [lastCommitment, setLastCommitment] = useState<string | null>(null);
+  const [consentStatus, setConsentStatus] = useState<"given" | "revoked">(() => {
+    return (localStorage.getItem("midnight-consent-status") as "given" | "revoked") || "given";
+  });
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem("chat-theme") as Theme) || "dark"
   );
@@ -124,6 +127,26 @@ export default function App() {
   async function recordConsentEvent(action: ConsentAction) {
     const c = await createConsentCommitment(action);
     setLastCommitment(c.commitment);
+    if (action === "consent_given") {
+      setConsentStatus("given");
+      localStorage.setItem("midnight-consent-status", "given");
+      setNotification({
+        message: "Consent successfully proven! A zero-knowledge cryptographic proof of your consent has been generated.",
+        type: "success"
+      });
+    } else if (action === "consent_revoked") {
+      setConsentStatus("revoked");
+      localStorage.setItem("midnight-consent-status", "revoked");
+      setNotification({
+        message: "Consent successfully revoked! Cryptographic proof of revocation generated. The AI will not learn from your future messages.",
+        type: "warning"
+      });
+    } else if (action === "data_wiped") {
+      setNotification({
+        message: "All history successfully wiped! Cryptographic proof of data deletion generated.",
+        type: "success"
+      });
+    }
   }
 
   async function handleSend() {
@@ -157,11 +180,13 @@ export default function App() {
     }
 
     // Local-only "learning": look for a fact worth remembering, store it,
-    // and let the user see/delete it immediately.
-    const candidate = extractCandidateFact(userText);
-    if (candidate) {
-      await addProfileFact(candidate);
-      setFacts(await listProfileFacts());
+    // and let the user see/delete it immediately, ONLY if consent is given.
+    if (consentStatus !== "revoked") {
+      const candidate = extractCandidateFact(userText);
+      if (candidate) {
+        await addProfileFact(candidate);
+        setFacts(await listProfileFacts());
+      }
     }
 
     const history = [...messages, userMsg].map((m) => ({
@@ -377,11 +402,17 @@ export default function App() {
         </div>
 
         <div className="consent-panel">
-          <button className="btn-ghost" onClick={() => recordConsentEvent("consent_given")}>
-            Prove my consent
+          <button
+            className={`btn-ghost ${consentStatus === "given" ? "active" : ""}`}
+            onClick={() => recordConsentEvent("consent_given")}
+          >
+            Prove my consent {consentStatus === "given" ? "✓" : ""}
           </button>
-          <button className="btn-ghost" onClick={() => recordConsentEvent("consent_revoked")}>
-            Revoke
+          <button
+            className={`btn-ghost ${consentStatus === "revoked" ? "active" : ""}`}
+            onClick={() => recordConsentEvent("consent_revoked")}
+          >
+            Revoke {consentStatus === "revoked" ? "✗" : ""}
           </button>
           <button className="btn-danger" onClick={handleWipe}>
             Erase everything
