@@ -104,6 +104,7 @@ body {
   flex: 1;
   background: var(--panel-2);
   border: 1px solid var(--border);
+  color: var(--text);
   border-radius: 6px;
   padding: 6px 0;
   cursor: pointer;
@@ -255,6 +256,13 @@ body {
 
 .btn-ghost:hover {
   border-color: var(--accent);
+}
+
+.btn-ghost.active {
+  background: var(--panel-2);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
 }
 
 .btn-danger {
